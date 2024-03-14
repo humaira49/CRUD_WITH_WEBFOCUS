@@ -1,0 +1,280 @@
+-DEFAULT &TAG ='REPORT';
+-DEFAULT &MESSAGES = '';
+-DEFAULT &RELOAD = 'N';
+-GOTO &TAG;
+-REPORT
+DEFINE FILE EMPLOYEES
+DELETE_/A200 ='<img src="&&HOMEPATH.EVAL/images/DELETE1.png"  style="cursor:pointer;" onclick="delt('||ID||');" >'; 
+EDIT_/A300 ='<img src="&&HOMEPATH.EVAL/images/EDIT.jpg" style="cursor:pointer;" onclick="edit('||ID||', '''||FIRST_NAME||''', '''||LAST_NAME||''', '''||DEPARTMENT||''');" >'; 
+END
+TABLE FILE EMPLOYEES
+HEADING 
+"Table of employees"
+PRINT ID AS Id AND	FIRST_NAME AS 'First name'	AND LAST_NAME	AS 'Last name' AND DEPARTMENT AS Department EDIT_ DELETE_
+ ON TABLE HOLD AS AFG_EMP FORMAT HTMTABLE
+ON TABLE SET HTMLCSS ON
+ON TABLE SET STYLE *
+INCLUDE = endeflt,
+TOPMARGIN=0,
+BOTTOMMARGIN=.5,
+-* LEFTMARGIN=4,
+-* RIGHTMARGIN=1,
+$
+TYPE=REPORT, GRID=OFF, FONT='Comic Sans MS', SIZE=10, SQUEEZE=ON,JUSTIFY=CENTER, COLOR=BLACK,
+$
+TYPE=TITLE, STYLE=BOLD, BORDER=LIGHT, $
+ TYPE=DATA,BORDER=LIGHT,$
+ TYPE=HEADING, SIZE=15,  STYLE=BOLD,JUSTIFY=CENTER, COLOR=BLACK, BACKCOLOR=WHITE,$
+ENDSTYLE
+END
+-RUN
+
+
+
+-IF &RELOAD NE 'Y' THEN GOTO HTMFORM;
+-HTMLFORM BEGIN
+ !IBI.FIL.AFG_EMP;
+-HTMLFORM END
+-GOTO FILE_END;
+-HTMFORM
+-HTMLFORM BEGIN
+ <HTML>
+  <HEAD>
+   <title>Create a new screen</title>
+<script type="text/javascript">
+  var gc_RpcType = "!IBI.GLB.RPCTYPE;";
+  var sHomePath = "!IBI.GLB.HOMEPATH;";
+</script>
+   <script type="text/javascript" src="!IBI.GLB.HOMEPATH;/jQuery/js/jquery-1.11.2.min.js"></script>
+   <script type="text/javascript" src="!IBI.GLB.HOMEPATH;/jQuery/js/jquery-ui-1.11.2.min.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+   <script>
+   function getData(){
+   var data = {
+      "IBIF_ex":"LAST_ASSIGNMENT",
+      "TAG":"REPORT",
+      "RELOAD":"Y"
+   };
+   $.post(gc_RpcType, data, function(resp){
+      $("#innerdiv").html(resp);
+     });
+   }
+   //_____________________________________________________delete function__________
+function delt(s){
+ alert('are you sure to delete this record?');
+	var data={
+	"IBIF_ex":"LAST_ASSIGNMENT",
+	"TAG":"DELETEEMP",	
+	"ID":s,
+	"RELOAD":"Y"
+	};
+		$.post(gc_RpcType, data, function(resp){
+			$("#innerdiv").html(resp);
+	});
+}
+ //______________________________________________edit function_____________________________________
+function edit(id, fname, lname, dep){
+// Toggle the collapse of the second accordion item
+$('#myModal2').modal('show');
+
+      $('#fname2').val(fname),
+      $('#lname2').val(lname),
+      $('#dept2').val(dep);
+      $('#id2').val(id);
+}
+
+//___________________________________________________INSERT FUNCTION__________  
+   $(document).ready(function(){
+    $("#addItem").click(function() {
+    var data
+     data = {
+      "IBIF_ex":"LAST_ASSIGNMENT",
+      "TAG":"AddItem",
+      "FNAME":$("#fname").val(),
+      "LNAME":$("#lname").val(),
+      "DEPT":$("#dept").val()
+     };
+     $.post(gc_RpcType, data, function(resp){
+      $("#MSG").html(resp);
+      getData();
+     });
+    });
+     //_______________________________________________for edit_________________________________
+    
+   $("#edit_record").click(function() {
+    var data
+     data = {
+      "IBIF_ex":"LAST_ASSIGNMENT",
+      "TAG":"EDIT_RECORD",
+      "FNAME":$("#fname2").val(),
+      "LNAME":$("#lname2").val(),
+      "DEPT":$("#dept2").val(),
+      "ID":$("#id2").val()
+     };
+     $.post(gc_RpcType, data, function(resp){
+      $("#MSG2").html(resp);
+      getData();
+     });
+    });
+     });
+   </script>
+  </HEAD>
+  <BODY>
+
+  
+  <!-- The Modal -->
+<div class="modal" id="myModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title">Adding new employee</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <!-- Modal body -->
+      <div class="modal-body">
+        <form >
+        First Name: <input type="text" id="fname" value="" class="mt-3" ><br>
+        Last Name: <input type="text" id="lname" value="" class="mt-3"><br>
+        Department: <input type="text" id="dept" value=""class="mt-3" ><br>
+       <SPAN ID="addItem" style="cursor:pointer;background-color:green; color:white; font-weight:bold;" class="mt-4 btn  ">Add</span><BR>
+  <SPAN ID="MSG" style="color:red; font-weight:bold;">!IBI.AMP.MESSAGES;</SPAN>
+       </form>
+       </div>
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+-*____________________________-SECOND MODEL_____________
+<!-- The Modal -->
+<div class="modal" id="myModal2">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title">Edit this record:</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <!-- Modal body -->
+      <div class="modal-body">
+        <form >
+        <input type="hidden" id="id2" value="" >
+        First Name: <input type="text" id="fname2" value="" class="mt-3" ><br>
+        Last Name: <input type="text" id="lname2" value="" class="mt-3"><br>
+        Department: <input type="text" id="dept2" value=""class="mt-3" ><br>
+       <SPAN ID="edit_record" style="cursor:pointer;background-color:green; color:white; font-weight:bold;" class="mt-4 btn  ">update</span><BR>
+      <SPAN ID="MSG2" style="color:red; font-weight:bold;">!IBI.AMP.MESSAGES;</SPAN>
+       </form>
+       </div>
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+ <TABLE>
+    <TR>
+     <TD><DIV ID="rptdata" STYLE="OVERFLOW:AUTO; WIDTH:500px; HEIGHT:250px;">
+ <div id = "innerdiv">
+ !IBI.FIL.AFG_EMP;
+ </div>
+     </DIV></TD>
+    </TR> 
+  </TABLE>
+  <button type="button" class="btn btn-dark mt-3 mx-5 " data-bs-toggle="modal" data-bs-target="#myModal" >
+    Insert or add
+  </button>
+  </BODY>
+ </HTML>
+-HTMLFORM END
+-EXIT
+-*_____________________________________________________insert______________________
+-AddItem
+MODIFY FILE EMPLOYEES
+ FREEFORM ID FIRST_NAME LAST_NAME DEPARTMENT
+ SQL SET LOADONLY
+ DATA
+ '18','&FNAME.EVAL','&LNAME.EVAL','&DEPT.EVAL', $
+END
+-RUN
+-SET &MSG = 'Record added!';
+-HTMLFORM BEGIN
+ !IBI.AMP.MSG;
+-HTMLFORM END
+
+-*________________________DELETE WITH WEB FOCUS_________________________________
+-DELETEEMP
+MODIFY FILE EMPLOYEES
+ FREEFORM ID
+ MATCH ID
+ ON MATCH DELETE
+ ON NOMATCH GOTO TOP
+ DATA 
+ '&ID'
+END
+-RUN
+-*_____________________________________DELETE WITH SQL_________________________
+SQL
+DELETE FROM EMPLOYEES WHERE ID='&ID';
+-RUN 
+-SET &RELOAD = 'Y';
+-GOTO REPORT;
+-EXIT
+-FILE_END
+
+-*__________________________________edit WITH WEB FOCUS__________________________
+-EDIT_RECORD
+-SET &ECHO = ALL;
+-TYPE &FNAME :: &LNAME :: &DEPT :: &ID
+DEFINE FILE EMPLOYEES
+ FIRST_NAME/A50 = '&FNAME';
+ LAST_NAME/A50 = '&LNAME';
+ DEPARTMENT/A50 = '&DEPT';
+END
+TABLE FILE EMPLOYEES
+ PRINT FIRST_NAME LAST_NAME DEPARTMENT
+ BY ID
+ WHERE ID EQ '&ID
+ ON TABLE HOLD AS EMPUPD FORMAT ALPHA
+END
+-RUN
+-TYPE Number of records in EMPUPD: &LINES
+
+MODIFY FILE EMPLOYEES
+ FIXFORM FROM EMPUPD
+  MATCH ID
+  ON MATCH UPDATE FIRST_NAME LAST_NAME DEPARTMENT
+  ON NOMATCH GOTO TOP
+ DATA ON EMPUPD
+END
+-RUN
+-* &CHNGD : Shows number of updated records
+-* &INPUT : Shows number of inserted records
+-* &DELT  : shows number of deleted records
+-* &LINES : Shows number of records in a hold file
+-*DIRECT UPDATE
+MODIFY FILE EMPLOYEES
+ FREEFORM FIRST_NAME LAST_NAME DEPARTMENT
+ MATCH ID
+ ON MATCH UPDATE FIRST_NAME LAST_NAME DEPARTMENT
+ ON NOMATCH GOTO TOP
+ DATA 
+ '&ID','&FNAME','&LNAME','&DEPT'
+END
+-RUN
+-*_________________________EDIT WITH SQL ___________________________________________
+SQL
+UPDATE EMPLOYEES SET FIRST_NAME='&FNAME', LAST_NAME='&LNAME', DEPARTMENT='&DEPT' WHERE ID='&ID';
+END
+-SET &MSG = 'Record updated!';
+-HTMLFORM BEGIN
+ !IBI.AMP.MSG;
+-HTMLFORM END
